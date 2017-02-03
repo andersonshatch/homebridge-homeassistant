@@ -13,6 +13,7 @@ var HomeAssistantLock;
 var HomeAssistantMediaPlayer;
 var HomeAssistantSensorFactory;
 var HomeAssistantSwitch;
+var HomeAssistantClimate;
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -26,6 +27,7 @@ module.exports = function(homebridge) {
     HomeAssistantCoverFactory = require('./accessories/cover')(Service, Characteristic, communicationError);
     HomeAssistantSensorFactory = require('./accessories/sensor')(Service, Characteristic, communicationError);
     HomeAssistantBinarySensorFactory = require('./accessories/binary_sensor')(Service, Characteristic, communicationError);
+    HomeAssistantClimate = require('./accessories/climate')(Service, Characteristic, communicationError);
 
     homebridge.registerPlatform('homebridge-homeassistant', 'HomeAssistant', HomeAssistantPlatform, false);
 };
@@ -180,6 +182,8 @@ HomeAssistantPlatform.prototype = {
                     accessory = HomeAssistantSensorFactory(that.log, entity, that);
                 }else if (entity_type == 'binary_sensor' && entity.attributes && entity.attributes.sensor_class) {
                     accessory = HomeAssistantBinarySensorFactory(that.log, entity, that);
+                }else if (entity_type == 'climate'){
+                    accessory = HomeAssistantClimate(that.log, entity, that);
                 }
 
                 if (accessory) {
