@@ -11,6 +11,7 @@ var HomeAssistantFan;
 var HomeAssistantLight;
 var HomeAssistantLock;
 var HomeAssistantMediaPlayer;
+var HomeAssistantOccupancySensor;
 var HomeAssistantSensorFactory;
 var HomeAssistantSwitch;
 
@@ -26,6 +27,7 @@ module.exports = function(homebridge) {
     HomeAssistantCoverFactory = require('./accessories/cover')(Service, Characteristic, communicationError);
     HomeAssistantSensorFactory = require('./accessories/sensor')(Service, Characteristic, communicationError);
     HomeAssistantBinarySensorFactory = require('./accessories/binary_sensor')(Service, Characteristic, communicationError);
+    HomeAssistantOccupancySensor = require('./accessories/occupancy_sensor')(Service, Characteristic, communicationError);
 
     homebridge.registerPlatform('homebridge-homeassistant', 'HomeAssistant', HomeAssistantPlatform, false);
 };
@@ -34,7 +36,7 @@ function HomeAssistantPlatform(log, config, api){
     // auth info
     this.host = config.host;
     this.password = config.password;
-    this.supportedTypes = config.supported_types || ['binary_sensor', 'cover', 'fan', 'input_boolean', 'light', 'lock', 'media_player', 'scene', 'sensor', 'switch'];
+    this.supportedTypes = config.supported_types || ['binary_sensor', 'cover', 'device_tracker', 'fan', 'input_boolean', 'light', 'lock', 'media_player', 'scene', 'sensor', 'switch'];
     this.foundAccessories = [];
     this.logging = config.logging !== undefined ? config.logging : true;
 
@@ -182,6 +184,8 @@ HomeAssistantPlatform.prototype = {
                     accessory = HomeAssistantSensorFactory(that.log, entity, that);
                 }else if (entity_type == 'binary_sensor' && entity.attributes && entity.attributes.sensor_class) {
                     accessory = HomeAssistantBinarySensorFactory(that.log, entity, that);
+                }else if (entity_type == 'device_tracker'){
+                    accessory = new HomeAssistantOccupancySensor(that.log, entity, that);
                 }
 
                 if (accessory) {
